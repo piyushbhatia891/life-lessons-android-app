@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "533765592004",
+    "firebase_url": "https://education-manner.firebaseio.com",
+    "project_id": "education-manner",
+    "storage_bucket": "education-manner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:533765592004:android:8a3514a63aabd5dd7fca91",
+        "android_client_info": {
+          "package_name": "tech.digitalneeds.education_life_living_manners"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "533765592004-qujv9hqj10tgpjavrs7l5cere1nr880h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaZ1KgBXRdx3YNsPwG0MKdpySW7sALaa0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "533765592004-qujv9hqj10tgpjavrs7l5cere1nr880h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
