@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 final pages = [
   new PageViewModel(
-      const Color(0xFF548CFF),
+      Colors.green,
       'assets/images/onboarding/mountain.png',
-      'Ready To Grow Your Business',
-      'Manage your inventory in very easy step',
+      'Ready To Learn Life Lessons',
+      'You will Find Basic Life living lessons for Your loved ones',
       'assets/images/onboarding/plane.png')
 ];
 
@@ -43,7 +43,7 @@ class Page extends StatelessWidget {
           new Transform(
             transform: new Matrix4.translationValues(0.0, 30.0 * (1.0 - percentVisible) ,0.0),
             child: new Padding(
-                padding: new EdgeInsets.only(top: 10.0, bottom: 10.0),
+                padding: new EdgeInsets.all(20.0),
                 child: new Text(
                   viewModel.title,
                   style: new TextStyle(

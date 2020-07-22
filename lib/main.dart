@@ -1,18 +1,60 @@
 import 'package:flutter/material.dart';
-import './modules/splash/SplashScreen.dart';
-void main() => runApp(MyApp());
+import './modules/splash/splashScreenMain.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import './shared/scoreCounter.dart';
+//import './shared/notification.dart';
+import './common/NetworkCheck.dart';
+void main() {
+  ConnectionStatusSingleton connectionStatus = ConnectionStatusSingleton.getInstance();
+  connectionStatus.initialize();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  //FirebaseMessaging _firebaseMessaging=FirebaseMessaging();
+  void initState(){
+    /*print("initstate");
+    _firebaseMessaging.configure(
+      onLaunch: (Map<String, dynamic> msg) {
+        print(" onLaunch called ${(msg)}");
+      },
+      onResume: (Map<String, dynamic> msg) {
+        print(" onResume called ${(msg)}");
+      },
+      onMessage: (Map<String, dynamic> msg) {
+        //showNotification(msg);
+        print(" onMessage called ${(msg)}");
+      },
+    );
+    *//*_firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, alert: true, badge: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings setting) {
+      print('IOS Setting Registed');
+    });*//*
+    *//*_firebaseMessaging.getToken().then((token) {
+      print("token is"+token);
+    });
+*/
+  }
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create:(BuildContext context)=>ScoreCounter()
+        )
+      ],
+    child:MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
       ),
-      home: SplashScreen(),
+      home: SplashScreenMain(),
+    )
     );
   }
 }

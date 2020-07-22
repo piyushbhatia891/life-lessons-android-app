@@ -13,11 +13,11 @@ class SplashScreenState extends State<SplashScreen> with TickerProviderStateMixi
 
   void initState(){
     var _duration = new Duration(seconds: 2);
-    Timer(
+    /*Timer(
       Duration(seconds: 3),
     ()=>{
         Navigator.push(context, MaterialPageRoute(builder: (context)=>Categories()))
-    });
+    });*/
   }
 
   StreamController<SlideUpdate> slideUpdateStream;

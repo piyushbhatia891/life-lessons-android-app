@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share/share.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import './model/share-model.dart';
 import '../../widgets/swiper_pagination.dart';
-import '../../widgets/assets.dart';
-
+import '../../common/common_functions.dart';
 class HomePage extends StatefulWidget {
   final String title;
   HomePage({this.title});
@@ -16,48 +15,35 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   final String title;
+  bool favourite=false;
+  List<String> quoteIds=[];
   HomePageState({this.title});
+  SharedPreferences preferences;
   final SwiperController _swiperController = SwiperController();
   int _pageCount;
   int _currentIndex = 0;
-  final List<ShareModel> titles = [
-    ShareModel(
-        name: 'first quote',
-        description:
-            "Lorem ipsum dolor \nsit amet, consectetur adipiscing \n elit placerat. ",
-        imageUrl: 'assets/images/mountain-1.jpg'),
-    ShareModel(
-        name: 'second quote',
-        description:
-            "Aliquam eget justo \n nec arcu ultricies elementum \n id at metus. ",
-        imageUrl: 'assets/images/nature-1.jpg'),
-    ShareModel(
-        name: 'third quote',
-        description:
-            "Nulla facilisi. \nFusce non tempus risus.\n Sed ultrices scelerisque sem",
-        imageUrl: 'assets/images/sea.jpg'),
-  ];
+  ShareModel model;
   final List<Color> pageBgs = [
     Colors.blue.shade300,
     Colors.grey.shade600,
     Colors.cyan.shade300
   ];
 
+  initializePreference() async{
+    preferences=await SharedPreferences.getInstance();
+  }
+
+  void initState(){
+    initializePreference();
+    favourite=false;
+    this.quoteIds=[];
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: <Widget>[
-          /*Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                      'https://images.unsplash.com/photo-1517030330234-94c4fb948ebc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1275&q=80'),
-                  fit: BoxFit.cover,
-                ),
-              )
-          ),*/
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -74,29 +60,62 @@ class HomePageState extends State<HomePage> {
                         }
                         if (snapshot.hasData) {
                           _pageCount=snapshot.data.documents.length;
-                          return Swiper(
-                            index: _currentIndex,
-                            controller: _swiperController,
-                            itemCount: snapshot.data.documents.length,
-                            onIndexChanged: (index) {
-                              setState(() {
-                                _currentIndex = index;
-                              });
-                            },
-                            loop: false,
-                            itemBuilder: (context, index) {
-                              return _buildPage(
-                                  title: snapshot.data.documents[index]
+                          if(_pageCount>0) {
+                            return Swiper(
+                              index: _currentIndex,
+                              controller: _swiperController,
+                              itemCount: snapshot.data.documents.length,
+                              onIndexChanged: (index) {
+                                setState(() {
+                                  _currentIndex = index;
+                                  model = new ShareModel(name: snapshot.data
+                                      .documents[index]['category'],
+                                      description: snapshot.data
+                                          .documents[index]
                                       ['description'],
-                                  pageBg: snapshot.data.documents[index]
-                                      ['imageUrl']);
-                            },
-                            pagination: SwiperPagination(
-                                builder: CustomPaginationBuilder(
-                                    activeSize: Size(10.0, 20.0),
-                                    size: Size(10.0, 15.0),
-                                    color: Colors.grey.shade600)),
-                          );
+                                      favourite:preferences.get('favourites')!=null
+                                          ? (preferences.getStringList('favourites').contains(snapshot.data.documents[index].documentID)
+                                          ? true : false) : false);
+                                });
+                              },
+                              loop: false,
+                              itemBuilder: (context, index) {
+                                model = new ShareModel(
+                                    id: snapshot.data.documents[index].documentID,
+                                    name: snapshot.data
+                                    .documents[index]['category'],
+                                    description: snapshot.data.documents[index]
+                                    ['description'],
+                                    favourite:preferences.get('favourites')!=null
+                                    ? (preferences.getStringList('favourites').contains(snapshot.data.documents[index].documentID)
+                                        ? true : false) : false);
+                                return _buildPage(
+                                    title: CommonFunctions.getSubjectValueInCamelCase(snapshot.data.documents[index]
+                                    ['description']),
+                                    pageBg: snapshot.data.documents[index]
+                                    ['imageUrl'],
+                                    favourite:preferences.get('favourites')!=null
+                                        ? (preferences.getStringList('favourites').contains(snapshot.data.documents[index].documentID)
+                                        ? true : false) : false);
+                              },
+                              pagination: SwiperPagination(
+                                  builder: CustomPaginationBuilder(
+                                      activeSize: Size(10.0, 20.0),
+                                      size: Size(10.0, 15.0),
+                                      color: Colors.grey.shade600)),
+                            );
+                          }
+                          else {
+                            return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Text(
+                                    CommonFunctions.getSubjectValueInCamelCase("Coming soon Or You dont have active internet connection"),
+                                    style: TextStyle(color: Colors.black,
+                                    fontSize: 24.0),
+                                  ),
+                                ));
+                          }
                         } else {
                           return Center(
                               child: Text(
@@ -104,32 +123,17 @@ class HomePageState extends State<HomePage> {
                             style: TextStyle(color: Colors.black),
                           ));
                         }
-                      })),
-              _buildButtons()
+                      }))/*,
+              model==null ? Text('Loading') : _buildButtons()*/
             ],
           ),
-
-          /*Positioned(
-            child: AppBar(
-              title: Text(title),
-              centerTitle: true,
-              backgroundColor: Colors.transparent,
-              elevation: 0.0,
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.share),
-                  onPressed: () {},
-                  tooltip: 'Share',
-                ),
-              ],
-            ),
-          )*/
         ],
       ),
     );
   }
 
-  Widget _buildButtons() {
+  Widget _buildButtons(bool favourite) {
+    Icon icon=favourite ? Icon(Icons.favorite): Icon(Icons.favorite_border);
     return Container(
       color: Colors.white,
       margin: const EdgeInsets.only(right: 16.0),
@@ -144,25 +148,39 @@ class HomePageState extends State<HomePage> {
             },
           ),
           FlatButton(
+            child: IconButton(
+                icon: icon,
+                onPressed: (){
+                    setState(() {
+                        model.favourite=!model.favourite;
+                        if(model.favourite){
+                          !quoteIds.contains(model.id) ? quoteIds.add(model.id) :"";
+                        }
+                        else
+                          quoteIds.contains(model.id) ? quoteIds.remove(model.id) :"";
+                        if(preferences.get('favourites')!=null){
+                          List list=preferences.getStringList('favourites');
+                          list.contains(quoteIds[0]) ?"" : list.add(quoteIds[0]);
+                          preferences.setStringList('favourites', list);
+                        }
+                        else
+                          preferences.setStringList('favourites',quoteIds);
+                        print(preferences.get('favourites'));
+                        quoteIds=[];
+                    });
+                }),
+            onPressed: null,
+          ),
+          FlatButton(
             textColor: Colors.grey.shade600,
             child: IconButton(
-              icon: Icon(Icons.share),
-              onPressed: () => share(context, titles[_currentIndex]),
+              icon: Icon(
+                  Icons.share
+              ),
+              onPressed: () => share(context, model),
             ),
             onPressed: (){}
           ),
-          /*FlatButton(
-              textColor: Colors.grey.shade600,
-              child: IconButton(
-                icon: Icon(_currentIndex < _pageCount - 1
-                    ? Icons.arrow_forward_ios
-                    : FontAwesomeIcons.check),
-                onPressed: () async {
-                  if (_currentIndex < _pageCount - 1) _swiperController.next();
-                }
-              ),
-              onPressed:(){}
-          ),*/
 
         ],
       ),
@@ -177,34 +195,9 @@ class HomePageState extends State<HomePage> {
         sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
   }
 
-  Widget _buildPage({String title, String pageBg}) {
+  Widget _buildPage({String title, String pageBg,bool favourite}) {
     final TextStyle titleStyle = TextStyle(
         fontWeight: FontWeight.w500, fontSize: 20.0, color: Colors.white);
-    /*return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              height: 200.0,
-              margin: EdgeInsets.all(10.0),
-              padding: EdgeInsets.all(10.0),
-              child: Center(
-                child:
-                Text(title, textAlign: TextAlign.center, style: titleStyle),
-              ),
-              decoration: BoxDecoration(
-                  borderRadius: new BorderRadius.only(
-                      topLeft: const Radius.circular(40.0),
-                      topRight: const Radius.circular(40.0)),
-                  image: DecorationImage(
-                      image: NetworkImage(pageBg), fit: BoxFit.contain)),
-            ),
-          )
-        ],
-      ),
-    )*/
-    print(title);
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -217,26 +210,27 @@ class HomePageState extends State<HomePage> {
                 clipBehavior: Clip.antiAliasWithSaveLayer,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0)),
-                //color: Colors.blue,
                 elevation: 10.0,
                 child: CachedNetworkImage(
-                    imageUrl: pageBg,
-                  fit: BoxFit.fill,
-                  fadeInDuration: Duration(seconds: 3),
+                    imageUrl: pageBg=="" ? "https://firebasestorage.googleapis.com/v0/b/education-manner.appspot.com/o/sea.jpg?alt=media&token=028276a0-0855-4108-8b75-e89f88b5f42f" : pageBg,
+                    imageBuilder: (context, imageProvider) => Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.fill,
+                            ),
+                      ),
+                    ),
+                    fadeInDuration: Duration(seconds: 3),
                     placeholder: (context, url) => SizedBox(
                         height: 10.0,
                         width: 10.0,
                         child:
                         CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Colors.blue),
-                            strokeWidth: 5.0)
+                            strokeWidth: 1.0)
                     ),
                     errorWidget: (context, url, error) => new Icon(Icons.error)
                 ),
-                /*child: Image.network(
-                  pageBg,
-                  fit: BoxFit.fill,
-                ),*/
               ),
             ),
           ),
@@ -247,7 +241,8 @@ class HomePageState extends State<HomePage> {
               title,
               style: TextStyle(color: Colors.black, fontSize: 20.0),
             ),
-          )
+          ),
+          _buildButtons(favourite)
         ]);
   }
 }

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../UI/pages.dart';
 import '../categories/categories.dart';
+import '../intro_menu/intro.dart';
 class PagerIndicator extends StatelessWidget {
 
   final PagerIndicatorViewModel viewModel;
@@ -62,10 +63,9 @@ class PagerIndicator extends StatelessWidget {
         new RaisedButton(
           elevation: 20.0,
     onPressed: (){
-        //HomePage(title: 'Sales Dashboard 2018')
-        Navigator.push(context, MaterialPageRoute(builder: (context)=>Categories()));
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>IntroPage()));
 
-    },child: Text('Login',style: TextStyle(
+    },child: Text('Start Learning',style: TextStyle(
             color: Colors.white
         ),),
           color: Colors.blue,
